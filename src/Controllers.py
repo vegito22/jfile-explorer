@@ -1,4 +1,4 @@
-import utils
+from  utils import Util
 import json
 import cgi
 
@@ -33,7 +33,7 @@ class ListDirectoryController(Controller):
         self.server.send_response(200)
         self.server.send_header('Content-type', 'application/json')
         self.server.end_headers()
-        data = utils.return_list()
+        data = Util.return_list()
         self.server.wfile.write(data)
 
 class CreateDirectory(Controller):
