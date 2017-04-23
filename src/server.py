@@ -48,9 +48,10 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         routes = [
             {'regexp': r'^/directory', CONTROLLER_NAME: 'ListDirectoryController'},
             {'regexp': r'^/router', CONTROLLER_NAME: 'RouterController'},
-            {'regexp': r'^/file-content', CONTROLLER_NAME: 'FileController'},
+            {'regexp': r'^/file-content', CONTROLLER_NAME: 'FileReadController'},
             {'regexp': r'^/rmqtt', CONTROLLER_NAME: 'MQTTController'},
-            {'regexp': r'^/filesave', CONTROLLER_NAME: 'FilePostController'}
+            {'regexp': r'^/filesave', CONTROLLER_NAME: 'FileSaveController'},
+            {'regexp': r'^/filedelete', CONTROLLER_NAME: 'FileDeleteController'}
         ]
 
         self.__router = Router(self)
@@ -82,7 +83,7 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
             self.__router.get_route(self.path)
 
     def do_POST(self):
-        self.__router.post_route(self.path, self.rfile, self.headers)
+            self.__router.post_route(self.path, self.rfile, self.headers)
 
 
 def start_server(port=8000):
@@ -108,6 +109,6 @@ if __name__ == "__main__":
         sys.exit(1)
     if not (args.rdir.endswith('/')):
         args.rdir = args.rdir + '/'
-
+    print "Server started"
     Util.root_path = args.rdir
     start_server(port_number)

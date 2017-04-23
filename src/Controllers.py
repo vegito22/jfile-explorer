@@ -36,17 +36,7 @@ class ListDirectoryController(Controller):
         data = Util.return_list()
         self.server.wfile.write(data)
 
-class CreateDirectory(Controller):
-    def __init__(self, server):
-        Controller.__init__(self, server)
-
-    def post(self, path):
-        print "Creating Directory"
-        self.server.send_response(403)
-        self.server.send_header('Content-type', 'application/json')
-        self.server.end_headers()
-
-class FileController(Controller):
+class FileReadController(Controller):
 
     def __init__(self, server):
         Controller.__init__(self, server)
@@ -59,7 +49,6 @@ class FileController(Controller):
             data["file-name"] = file_path
             with open(file_path, 'r') as f:
                 data["content"] = f.read().encode('UTF-8')
-
             self.server.send_response(200)
             self.server.send_header('Content-type', 'application/json')
             self.server.end_headers()
@@ -70,7 +59,7 @@ class FileController(Controller):
             self.server.send_header('Content-type', 'application/json')
             self.server.end_headers()
             
-class FilePostController(Controller):
+class FileSaveController(Controller):
 
     def __init__(self, server):
         Controller.__init__(self, server)
@@ -83,12 +72,38 @@ class FilePostController(Controller):
                      'CONTENT_TYPE':headers['Content-Type'],})
         filename = form.getvalue("file-name")
         content = form.getvalue("content")
+        file_status = form.getvalue("saved-status")
+        if Util.save_file(filename, content, file_status):
+            self.server.send_response(200)
+            self.server.send_header('Content-type', 'text/html')
+            self.server.end_headers()
+            self.server.wfile.write("Success")
+        else:
+            self.server.send_response(403)
+            self.server.send_header('Content-type', 'application/json')
+            self.server.end_headers()
+
+class FileDeleteController(Controller):
+
+    def __init__(self, server):
+        Controller.__init__(self, server)
+
+    def post(self, path, rfile, headers):
+        form = cgi.FieldStorage(
+            fp=rfile,
+            headers=headers,
+            environ={'REQUEST_METHOD':'POST',
+                     'CONTENT_TYPE':headers['Content-Type'],})
+        filename = form.getvalue("file-name")
         try:
-            with open(filename, "w") as f:
-                f.write(content)
+            data = {"result" : "success"}
+            Util.delete_file(filename)
+            self.server.send_response(200)
+            self.server.send_header('Content-type', 'application/json')
+            self.server.end_headers()
+            self.server.wfile.write(json.dumps(data))
         except Exception as E:
             print E
-        self.server.send_response(200)
-        self.server.send_header('Content-type', 'text/html')
-        self.server.end_headers()
-        self.server.wfile.write("Success")
+            self.server.send_response(403)
+            self.server.send_header('Content-type', 'application/json')
+            self.server.end_headers()

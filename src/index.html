@@ -20,10 +20,9 @@
         .wrapperBlock {
             display: block;
             border: 1px black solid;
-            height: 370px;
+            height: 410px;
             overflow: auto;
         }
-
     </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,7 +43,9 @@
 
 </head>
 <div class="container-fluid">
-    <h2>Router Workspace</h2>
+    <div class="row">
+        <h2>Router Workspace</h2>
+    </div>
 
     <div class="row">
         <div class="col-lg-12">
@@ -76,22 +77,29 @@
                         <div class="wrapperBlock">
                             <div id="directoryTree" class="jstree jstree-1 jstree-default" style="min-height:200px;"></div>
                         </div>
+
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-lg-12">
-                    <button type="button" class="btn btn-primary" id="create" style="display: none;">Create Directory</button>
-                    <button type="button" class="btn btn-primary" id="createf" style="display: none;">Create File</button>
-                    <button type="button" class="btn btn-primary" id="delete" style="display: none;">Delete</button>
+                    <button type="button" class="btn btn-primary" id="created">Create Directory</button>
+                    <button type="button" class="btn btn-primary" id="createf">Create File</button>
+                    <button type="button" class="btn btn-primary" id="delete">Delete</button>
                 </div>
             </div>
         </div>
         <div class="col-lg-9">
+            <ul class="nav nav-tabs" "display: none;">
+                <li class="active" id="filename-tab"><a href="#" id="filename-tab-a">Default</a></li>
+            </ul>
+
             <div id="resizable" class="ui-widget-content">
                 <div class="inner" id="editor"></div>
             </div>
+
         </div>
+
     </div>
     <!--/row-->
 </div>
