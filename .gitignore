@@ -90,3 +90,10 @@ ENV/
 
 # PyCharm
 .idea/
+
+#JS Local Repo
+src/jstree/
+src/ace-builds/
+src/bootstrap/
+src/jquery-dist/
+src/tether/
