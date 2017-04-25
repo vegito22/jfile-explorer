@@ -96,6 +96,9 @@ def start_server(port=8000):
 
 
 if __name__ == "__main__":
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
     port_number = None
     parser = argparse.ArgumentParser(description='Lightweight File Explorer')
     parser.add_argument('--port', type=int, default=8080, help="Port number to start server")
