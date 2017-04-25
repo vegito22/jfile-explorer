@@ -17,3 +17,6 @@ In the operational mode from the CLI invoke
 request extension-service start server.py
 This should start the server on the default port 8080
 
+## Example
+
+![](https://media.giphy.com/media/LoUMSSbj3NtLy/giphy.gif)
