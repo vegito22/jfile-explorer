@@ -1,12 +1,17 @@
 import os
 import json
 import shutil
+import datetime
+import Cookie
+import uuid
+
     
 import mimetypes
 
 class Util:
     id = 1
     root_path = "/var/"
+    active_session_ids = ['659002a035e54f5eb324c40c51375a66']
 
     @staticmethod
     def walk_directory(rootDir, dict, pid):
@@ -82,3 +87,29 @@ class Util:
                 except Exception as E:
                     return False
                 return True
+
+    @staticmethod
+    def login_util(username, password, module="test"):
+        if module == "test":
+            if username == "test" and password == "test":
+                return Util.generate_session_id_cookie()
+            return None
+
+    @staticmethod
+    def generate_session_id_cookie():
+        expiration = datetime.datetime.now() + datetime.timedelta(days=30)
+        cookie = Cookie.SimpleCookie()
+        randomId = uuid.uuid4().hex
+        cookie["session_id"] = randomId
+        cookie["session_id"]["expires"] = expiration.strftime('%a, %d %b %Y %H:%M:%S')
+        cookie["session_id"]["max-age"] = 300
+        Util.active_session_ids.append(randomId)
+        return cookie
+
+    @staticmethod
+    def invalidate_cookie():
+        pass
+
+    @staticmethod
+    def session_id_valid (session_id):
+        return session_id in Util.active_session_ids

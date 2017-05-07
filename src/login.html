@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>Login</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <script src="jquery-dist/dist/jquery.min.js"></script>
+    <script src="tether/dist/js/tether.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <![endif]-->
+</head>
+
+<body>
+<div class="container">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+    <div class="row">
+        <div class="form_bg">
+            <form>
+                <h2 class="text-center">Login Page</h2>
+                <br/>
+                <div class="form-group">
+                    <input type="email" class="form-control" id="userid" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" id="pwd" placeholder="Password">
+                </div>
+                <br/>
+                <div class="align-center">
+                    <button type="submit" class="btn btn-default" id="login">Login</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
+    </div>
+</div>
+</body>
+<script>
+    $("body").on('click','.btn',function(){
+        var data = {}
+        data["username"] = $('#userid').val();
+        data["password"] = $('#pwd').val();
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/login",
+            data: data,
+            dataType: "json",
+
+            success: function (returnValue) {
+                console.log("Success");
+                window.location.href = "/router";
+            },
+
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr, thrownError);
+                alert("Login Failed");
+            }
+        });
+    });
+</script>
+</html>

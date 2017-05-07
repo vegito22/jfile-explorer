@@ -5,12 +5,13 @@ import sys
 import os
 from BaseHTTPServer import *
 import argparse
+import Cookie
 
 from Controllers import *
 from utils import Util
 
 CONTROLLER_NAME = "controller-name"
-
+local_file_cache = {}
 
 class Router():
     def __init__(self, server):
@@ -21,6 +22,13 @@ class Router():
         self.__routes.append({'path': path, CONTROLLER_NAME: controller})
 
     def get_route(self, path):
+        """
+        if path != '/login':
+            self.__server.send_response(301)
+            self.__server.send_header('Location','/login')
+            self.__server.end_headers()
+            return
+        """
         for route in self.__routes:
             if re.search(route['path'], path):
                 cls = globals()[route[CONTROLLER_NAME]]
@@ -46,12 +54,13 @@ class Router():
 class CustomRequestHandler(BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
         routes = [
-            {'regexp': r'^/directory', CONTROLLER_NAME: 'ListDirectoryController'},
-            {'regexp': r'^/router', CONTROLLER_NAME: 'RouterController'},
-            {'regexp': r'^/file-content', CONTROLLER_NAME: 'FileReadController'},
-            {'regexp': r'^/rmqtt', CONTROLLER_NAME: 'MQTTController'},
-            {'regexp': r'^/filesave', CONTROLLER_NAME: 'FileSaveController'},
-            {'regexp': r'^/filedelete', CONTROLLER_NAME: 'FileDeleteController'}
+            {'regexp': r'^/directory', CONTROLLER_NAME: 'ListDirectoryController', 'auth-required': True},
+            {'regexp': r'^/router', CONTROLLER_NAME: 'RouterController', 'auth-required': True},
+            {'regexp': r'^/file-content', CONTROLLER_NAME: 'FileReadController', 'auth-required': True},
+            {'regexp': r'^/rmqtt', CONTROLLER_NAME: 'MQTTController', 'auth-required': True},
+            {'regexp': r'^/filesave', CONTROLLER_NAME: 'FileSaveController', 'auth-required': True},
+            {'regexp': r'^/filedelete', CONTROLLER_NAME: 'FileDeleteController', 'auth-required': True},
+            {'regexp': r'^/login', CONTROLLER_NAME: 'LoginController', 'auth-required': False}
         ]
 
         self.__router = Router(self)
@@ -61,30 +70,30 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
     def do_GET(self):
-        if self.path.endswith(".js"):
+        cookie = None
+        path = self.path
+        client_addr = self.client_address
+
+        if 'Cookie' in self.headers:
+            cookie  = Cookie.SimpleCookie(self.headers["Cookie"])
+
+        if path.endswith(".js"):
+            content = ""
             mimetype ='application/javascript'
-            static_filename = os.curdir + '/' + self.path
-            with open(static_filename) as f:
-                content = f.read()
-                self.send_response(200)
-                self.send_header('Content-type', mimetype)
-                self.end_headers()
-                self.wfile.write(content)
-        elif ".css" in self.path:
-            mimetype = 'text/css'
-            static_filename = os.curdir + '/' + self.path
-            with open(static_filename) as f:
-                content = f.read()
-                self.send_response(200)
-                self.send_header('Content-type', mimetype)
-                self.end_headers()
-                self.wfile.write(content)
+            static_filename = os.curdir + path
+            if path not in local_file_cache.keys():
+                with open(static_filename) as f:
+                    content = f.read()
+                    local_file_cache[path] = content
+            self.send_response(200)
+            self.send_header('Content-type', mimetype)
+            self.end_headers()
+            self.wfile.write(local_file_cache[path])
         else:
-            self.__router.get_route(self.path)
+            self.__router.get_route(path)
 
     def do_POST(self):
             self.__router.post_route(self.path, self.rfile, self.headers)
-
 
 def start_server(port=8000):
     try:
@@ -94,16 +103,16 @@ def start_server(port=8000):
         print 'Server shutting down'
         httpd.socket.close()
 
-
 if __name__ == "__main__":
     port_number = None
     parser = argparse.ArgumentParser(description='Lightweight File Explorer')
     parser.add_argument('--port', type=int, default=8080, help="Port number to start server")
     parser.add_argument('--rdir', type=str, default='/var/', help="Specify the Root Directory for explorer")
+    parser.add_argument('--epath', type=str, default='/var/tmp/', help="Extra path to be appended to sys.path")
     args = parser.parse_args()
     try:
         port_number = int(args.port)
-        if not (os.path.isdir(args.rdir)):
+        if not((os.path.isdir(args.rdir)) and (os.path.isdir(args.epath))):
             raise Exception("Not a path")
     except:
         sys.exit(1)
@@ -111,4 +120,5 @@ if __name__ == "__main__":
         args.rdir = args.rdir + '/'
     print "Server started"
     Util.root_path = args.rdir
+    sys.path.append(args.epath)
     start_server(port_number)

@@ -20,6 +20,7 @@ class RouterController(Controller):
         self.server.send_response(200)
         self.server.send_header('Content-type', 'text/html')
         self.server.end_headers()
+
         with open('index.html') as f:
             temp = (f.read())
             self.server.wfile.write(temp)
@@ -107,3 +108,41 @@ class FileDeleteController(Controller):
             self.server.send_response(403)
             self.server.send_header('Content-type', 'application/json')
             self.server.end_headers()
+
+class LoginController(Controller):
+
+    def __init__(self, server):
+        Controller.__init__(self, server)
+
+    def show(self, path):
+        self.server.send_response(200)
+        self.server.send_header('Content-type', 'text/html')
+        self.server.end_headers()
+        with open('login.html') as f:
+            content = (f.read())
+            self.server.wfile.write(content)
+
+    def post(self, path, rfile, headers):
+        data = {"result" : False}
+
+        form = cgi.FieldStorage(
+            fp=rfile,
+            headers=headers,
+            environ={'REQUEST_METHOD':'POST',
+                     'CONTENT_TYPE':headers['Content-Type'],})
+        username = form.getvalue("username")
+        password = form.getvalue("password")
+
+        loginResponseCookie = Util.login_util(username, password, "test")
+        if loginResponseCookie:
+            data = {"result" : True}
+            self.server.send_response(200)
+            self.server.send_header('Content-type', 'application/json')
+            self.server.send_header('Set-Cookie', loginResponseCookie.output(header=''))
+            self.server.end_headers()
+            self.server.wfile.write(json.dumps(data))
+        else:
+            self.server.send_response(401)
+            self.server.send_header('Content-type', 'application/json')
+            self.server.end_headers()
+
